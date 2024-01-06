@@ -14,36 +14,45 @@ public class Main {
     }
 
     public static boolean game(){
+        boolean noDoubles = false;
         int correctGuess = 0;
         int guessLength = 0;
         Random rand = new Random();
         System.out.println("Please choose a difficulty for your game ranging from easy, medium, hard and impossible");
         Scanner scanner = new Scanner(System.in);
         String difficulty = scanner.next();
-        try {
-            if (difficulty.equals("easy")) {
-                correctGuess = rand.nextInt(999 - 100) + 100;
-                guessLength = 3;
-                guessOne(correctGuess, guessLength);
-            } else if (difficulty.equals("medium")) {
-                correctGuess = rand.nextInt(9999 - 1000) + 1000;
-                guessLength = 4;
-                guessOne(correctGuess, guessLength);
-            } else if (difficulty.equals("hard")) {
-                correctGuess = rand.nextInt(99999 - 10000) + 10000;
-                guessLength = 5;
-                guessOne(correctGuess, guessLength);
-            } else if (difficulty.equals("impossible")) {
-                correctGuess = rand.nextInt(999999 - 100000) + 100000;
-                guessLength = 6;
-                guessOne(correctGuess, guessLength);
-            } else {
-                throw new IllegalArgumentException("That is not a valid difficulty!");
+        while (noDoubles == false){
+            try {
+                if (difficulty.equals("easy")) {
+                    correctGuess = rand.nextInt(999 - 100) + 100;
+                    guessLength = 3;
+                } else if (difficulty.equals("medium")) {
+                    correctGuess = rand.nextInt(9999 - 1000) + 1000;
+                    guessLength = 4;
+                } else if (difficulty.equals("hard")) {
+                    correctGuess = rand.nextInt(99999 - 10000) + 10000;
+                    guessLength = 5;
+                } else if (difficulty.equals("impossible")) {
+                    correctGuess = rand.nextInt(999999 - 100000) + 100000;
+                    guessLength = 6;
+                } else {
+                    throw new IllegalArgumentException("That is not a valid difficulty!");
+                }
+            } catch (IllegalArgumentException e) {
+                System.out.println(e.getMessage());
+                return game();
             }
-        } catch (IllegalArgumentException e) {
-            System.out.println(e.getMessage());
-            return game();  // Recursively call the game() method to allow the user to try again
+            noDoubles = true;
+            String guessString = Integer.toString(correctGuess);
+            for (int i = 0; i < guessString.length(); i++){
+                for (int j = i+1; j < guessString.length(); j++){
+                    if (guessString.charAt(i) == guessString.charAt(j)){
+                        noDoubles = false;
+                    }
+                }
+            }
         }
+        guessOne(correctGuess, guessLength);
         System.out.println("Would you like to replay the game? Type 1 for yes and 0 for no");
         int response = scanner.nextInt();
         if (response == 1){
@@ -59,8 +68,10 @@ public class Main {
         int bulls = 0;
         int cows = 0;
         int guessAttempt = 1;
+        boolean hintUsed = false;
+        boolean damageDone = false;
         while (bulls != guessLength) {
-            boolean validGuess = true; // Reset validGuess to true for each guess attempt
+            boolean validGuess = true;
             int guess = 0;
             boolean notInt = false;
             boolean errorMessageGivenAlready = false;
@@ -91,11 +102,9 @@ public class Main {
                     break;
                 }
             }
-
             if (!validGuess) {
-                continue; // Skip the cows and bulls logic and ask for another guess
+                continue;
             }
-
             String numberString = Integer.toString(guess);
             int[] guessArray = new int[numberString.length()];
             for (int i = 0; i < numberString.length(); i++) {
@@ -116,6 +125,34 @@ public class Main {
                 System.out.println("Cows: " + cows);
                 System.out.println("Bulls: " + bulls);
                 guessAttempt++;
+                if (guessAttempt == 13){
+                    System.out.println("You've run out of correct guesses! Better luck next time");
+                    break;
+                }
+                if (guessAttempt >= 9){
+                    if (hintUsed == false){
+                        System.out.println("You only have " + (13 - guessAttempt) + " guesses remaining and you might lose! Would you like a hint?");
+                        System.out.println("Hints is a randomly generated system. You might get a very useful hint or you might get a useless hint");
+                        System.out.println("You can only use a hint once");
+                        System.out.println("Type yes or no");
+                        Scanner scanner = new Scanner(System.in);
+                        String answer = scanner.next();
+                        if (answer.equals("yes")){
+                            hintUsed = true;
+                            damageDone = hint(secretNumber, guessLength);
+                        }
+                        else if (answer.equals("no")){
+                            hintUsed = false;
+                        }
+                        else{
+                            System.out.println("Shame on you for not entering a valid input! As punishment, you've lost your chance to use a hint");
+                        }
+                    }
+                }
+                if (damageDone == true){
+                    guessAttempt++;
+                    damageDone = false;
+                }
                 System.out.println("You have " + (13 - guessAttempt) + " guess left");
             } else {
                 System.out.println("Congratulations, you've successfully guessed the number!");
@@ -146,5 +183,29 @@ public class Main {
             }
         }
         return count;
+    }
+
+    public static boolean hint(int correctGuess, int guessLength){
+        Random rand = new Random();
+        int difficulty = rand.nextInt(4);
+        int position = rand.nextInt(guessLength - 1);
+        String guessString = Integer.toString(correctGuess);
+        char digit = guessString.charAt(position);
+        if (difficulty == 3){
+            System.out.println("Congrats, you've received a super-duper helpful hint!");
+            System.out.println("The digit at position"  + position + " is " + digit);
+            return false;
+        }
+        else if (difficulty % 2 == 0){
+            System.out.println("Oh you didn't hit jackpot, but you didn't get a completely useless hint either!");
+            System.out.println("One of the digits in your secret number is " + digit);
+            return false;
+        }
+        else{
+            System.out.println("oH NOOOO you got really unlucky! Not only did you get no information, you also lost another guess attempt");
+            System.out.println("Sucks to be you, I guess. Anyways, continuing on with the game");
+            return true;
+        }
+
     }
 }
