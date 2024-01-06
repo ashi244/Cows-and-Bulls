@@ -55,12 +55,13 @@ public class Main {
         }
     }
 
-    public static void guessOne(int secretNumber, int guessLength){
+    public static void guessOne(int secretNumber, int guessLength) {
         int bulls = 0;
-        boolean validGuess = true;
-        while (bulls != 4) {
+        int cows = 0;
+        int guessAttempt = 1;
+        while (bulls != guessLength) {
+            boolean validGuess = true; // Reset validGuess to true for each guess attempt
             int guess = 0;
-            int guessAttempt = 1;
             boolean notInt = false;
             boolean errorMessageGivenAlready = false;
             while (validGuess) {
@@ -90,6 +91,11 @@ public class Main {
                     break;
                 }
             }
+
+            if (!validGuess) {
+                continue; // Skip the cows and bulls logic and ask for another guess
+            }
+
             String numberString = Integer.toString(guess);
             int[] guessArray = new int[numberString.length()];
             for (int i = 0; i < numberString.length(); i++) {
@@ -97,22 +103,40 @@ public class Main {
                 int digit = Character.getNumericValue(digitChar);
                 guessArray[i] = digit;
             }
+            String correctGuess = Integer.toString(secretNumber);
             int[] numberArray = new int[numberString.length()];
             for (int i = 0; i < numberString.length(); i++) {
-                char digitChar = numberString.charAt(i);
+                char digitChar = correctGuess.charAt(i);
                 int digit = Character.getNumericValue(digitChar);
                 numberArray[i] = digit;
             }
             bulls = findBulls(numberArray, guessArray);
+            cows = findCows(numberArray, guessArray);
+            if (bulls != guessLength) {
+                System.out.println("Cows: " + cows);
+                System.out.println("Bulls: " + bulls);
+                guessAttempt++;
+                System.out.println("You have " + (13 - guessAttempt) + " guess left");
+            } else {
+                System.out.println("Congratulations, you've successfully guessed the number!");
+            }
         }
-
     }
-    public static void guessTwo(int guess){
-        System.out.println("Check complete");
+    public static int findCows(int[] secretNumber, int[] userGuess){
+        int count = 0;
+        int cows = 0;
+        for (int i = 0; i < secretNumber.length; i++) {
+            int secretDigit = secretNumber[i];
+            for (int j = 0; j < userGuess.length; j++) {
+                int guessDigit = userGuess[j];
+                if (secretDigit == guessDigit && i != j) {
+                    cows++;
+                    break;
+                }
+            }
+        }
+        return cows;
     }
-    /*public static int findCows(String secretNumber, String userGuess){
-
-    }*/
 
     public static int findBulls(int [] secretNumber, int [] userGuess){
         int count = 0;
@@ -121,5 +145,6 @@ public class Main {
                 count += 1;
             }
         }
+        return count;
     }
 }
