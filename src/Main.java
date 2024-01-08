@@ -5,6 +5,7 @@ public class Main {
         System.out.println("Hello! Welcome to my game: COWS and BULLS");
         System.out.println("The rules of this game are very simple. You will be trying to guess a specific number. For every time you guess, you the computer will inform you of how many 'cows' and 'bulls' you have in your guess");
         System.out.println("A cow means that the digit is the correct number but it is in the wrong position. A bull means you have the correct number in the correct position");
+        System.out.println("There are no repeated digits in the secret number");
         System.out.println("You will have 12 attempts at guessing the number. Good luck!");
         boolean contGame = true;
         int count = 0;
@@ -18,9 +19,13 @@ public class Main {
         int correctGuess = 0;
         int guessLength = 0;
         Random rand = new Random();
+
+        /*Choose difficulty of game*/
         System.out.println("Please choose a difficulty for your game ranging from easy, medium, hard and impossible");
         Scanner scanner = new Scanner(System.in);
         String difficulty = scanner.next();
+
+        /*Generate a random number based on the chosen difficulty*/
         while (noDoubles == false){
             try {
                 if (difficulty.equals("easy")) {
@@ -42,6 +47,8 @@ public class Main {
                 System.out.println(e.getMessage());
                 return game();
             }
+
+            /*Check if number has repeated digits*/
             noDoubles = true;
             String guessString = Integer.toString(correctGuess);
             for (int i = 0; i < guessString.length(); i++){
@@ -52,7 +59,9 @@ public class Main {
                 }
             }
         }
-        guessOne(correctGuess, guessLength);
+        guessOne(correctGuess, guessLength); /*Start the guessing process*/
+
+        /*Ask if user wants to play the game again*/
         System.out.println("Would you like to replay the game? Type 1 for yes and 0 for no");
         int response = scanner.nextInt();
         if (response == 1){
@@ -70,14 +79,18 @@ public class Main {
         int guessAttempt = 1;
         boolean hintUsed = false;
         boolean damageDone = false;
+
+        /*Continue guessing until all digits are correctly guessed*/
         while (bulls != guessLength) {
             boolean validGuess = true;
             int guess = 0;
             boolean notInt = false;
             boolean errorMessageGivenAlready = false;
+
+            /*Validate the user's input for each guess*/
             while (validGuess) {
                 Scanner scanner = new Scanner(System.in);
-                System.out.println("Please enter a " + guessLength + " digit number for guess number: " + guessAttempt);
+                System.out.println("Please enter a " + guessLength + " digit number for guess number " + guessAttempt);
                 String currentGuess = scanner.next();
 
                 for (int i = 0; i < currentGuess.length(); i++) {
@@ -97,6 +110,8 @@ public class Main {
                     validGuess = false;
                     System.out.println("You have not entered a " + guessLength + " digit number! Please enter again");
                 }
+
+                /*If the input is valid, parse the guess into an integer and exit the loop*/
                 if ((!notInt) && (currentGuess.length() == guessLength)) {
                     guess = Integer.parseInt(currentGuess);
                     break;
@@ -105,6 +120,8 @@ public class Main {
             if (!validGuess) {
                 continue;
             }
+
+            /*Convert both the correct guess and the user's guess into arrays*/
             String numberString = Integer.toString(guess);
             int[] guessArray = new int[numberString.length()];
             for (int i = 0; i < numberString.length(); i++) {
@@ -119,6 +136,8 @@ public class Main {
                 int digit = Character.getNumericValue(digitChar);
                 numberArray[i] = digit;
             }
+
+            /*Calculate the number of bulls and cows and output them to the user*/
             bulls = findBulls(numberArray, guessArray);
             cows = findCows(numberArray, guessArray);
             if (bulls != guessLength) {
@@ -129,7 +148,9 @@ public class Main {
                     System.out.println("You've run out of correct guesses! Better luck next time");
                     break;
                 }
-                if (guessAttempt >= 9){
+
+                /*Checks if user is on the verge of losing and offers them a chance to use a hint*/
+                if (guessAttempt >= 8){
                     if (hintUsed == false){
                         System.out.println("You only have " + (13 - guessAttempt) + " guesses remaining and you might lose! Would you like a hint?");
                         System.out.println("Hints is a randomly generated system. You might get a very useful hint or you might get a useless hint");
@@ -149,11 +170,13 @@ public class Main {
                         }
                     }
                 }
+
+                /*Checks if user got the "unlucky hint" and lost one guessing attempt*/
                 if (damageDone == true){
                     guessAttempt++;
                     damageDone = false;
                 }
-                System.out.println("You have " + (13 - guessAttempt) + " guess left");
+                System.out.println("You have " + (13 - guessAttempt) + " guesses left");
             } else {
                 System.out.println("Congratulations, you've successfully guessed the number!");
             }
@@ -203,7 +226,7 @@ public class Main {
         }
         else{
             System.out.println("oH NOOOO you got really unlucky! Not only did you get no information, you also lost another guess attempt");
-            System.out.println("Sucks to be you, I guess. Anyways, continuing on with the game");
+            System.out.println("Anyways, continuing on with the game");
             return true;
         }
 
